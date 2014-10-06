@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var mainLayer: SKNode!
     var cannon: SKSpriteNode!
@@ -16,8 +16,12 @@ class GameScene: SKScene {
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
     let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
-    let KHaloSpeed : CGFloat = 100.0
+    let KHaloSpeed: CGFloat = 100.0
 
+    
+    let kHaloCategory:UInt32 = 0x1 << 0
+    let kBallCategory:UInt32 = 0x1 << 1
+    let kEdgeCategory:UInt32 = 0x1 << 2
     
     var didShoot = false
     
@@ -26,6 +30,7 @@ class GameScene: SKScene {
         
         // Turn off gravity 
         self.physicsWorld.gravity = CGVectorMake(0.0, 0.0)
+        self.physicsWorld.contactDelegate = self
         
         // Add the background
         let background = SKSpriteNode(imageNamed: "Starfield")
@@ -38,10 +43,12 @@ class GameScene: SKScene {
         // Add Edges
         let leftEdge = SKNode.node()
         leftEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
+        leftEdge.physicsBody?.categoryBitMask = kEdgeCategory
         leftEdge.position = CGPointZero
         self.addChild(leftEdge)
         let rightEdge = SKNode.node()
         rightEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
+        rightEdge.physicsBody?.categoryBitMask = kEdgeCategory
         rightEdge.position = CGPointMake(view.frame.size.width, 0.0)
         self.addChild(rightEdge)
         
@@ -106,6 +113,9 @@ class GameScene: SKScene {
         ball.physicsBody?.restitution = 1.0
         ball.physicsBody?.linearDamping = 0.0
         ball.physicsBody?.friction = 0.0
+        
+        ball.physicsBody?.categoryBitMask = kBallCategory
+        ball.physicsBody?.collisionBitMask = kEdgeCategory
     }
     
     func spawnHalo() {
@@ -120,10 +130,36 @@ class GameScene: SKScene {
         halo.physicsBody?.linearDamping = 0.0
         halo.physicsBody?.friction = 0.0
         
+        halo.physicsBody?.categoryBitMask = kHaloCategory
+        halo.physicsBody?.collisionBitMask = kEdgeCategory | kHaloCategory
+        halo.physicsBody?.contactTestBitMask = kBallCategory
+        
         
         mainLayer.addChild(halo)
     }
 
+    // MARK: SKPhysicsContactDelegate 
+    
+    func didBeginContact(contact: SKPhysicsContact) {
+        var firstBody:SKPhysicsBody
+        var secondBody:SKPhysicsBody
+        
+        /* Ensure that the halo is the firstBody */
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        }
+        else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
+            firstBody.node?.removeFromParent()
+            secondBody.node?.removeFromParent()
+        }
+    }
+    
     // MARK: Helper Functions
     
     private func radiansToVector(radians : CGFloat) -> CGVector
