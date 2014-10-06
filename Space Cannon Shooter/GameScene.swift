@@ -137,6 +137,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         mainLayer.addChild(halo)
     }
+    
+    
+    func addExplosionToPosition(position: CGPoint) {
+        let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
+        var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        
+        explosion.position = position
+        mainLayer.addChild(explosion)
+        
+        let removeExplosion = SKAction.sequence([SKAction.waitForDuration(1.5), SKAction.removeFromParent()])
+        explosion.runAction(removeExplosion)
+    }
 
     // MARK: SKPhysicsContactDelegate 
     
@@ -155,6 +167,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
+            
+            self.addExplosionToPosition(firstBody.node!.position)
+            
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
         }
