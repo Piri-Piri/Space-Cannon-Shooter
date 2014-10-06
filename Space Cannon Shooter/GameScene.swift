@@ -12,12 +12,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var mainLayer: SKNode!
     var cannon: SKSpriteNode!
+    var ammoDisplay: SKSpriteNode!
+    
+    var ammoValue: Int = 5 // private value
+    var ammo: Int {
+        set {
+            if newValue >= 0 && newValue <= 5 {
+                ammoValue = newValue
+                ammoDisplay.texture = SKTexture(imageNamed: "Ammo\(ammoValue)")
+            }
+        }
+        get {
+            return ammoValue
+        }
+    }
 
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
     let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
     let KHaloSpeed: CGFloat = 100.0
-
     
     let kHaloCategory:UInt32 = 0x1 << 0
     let kBallCategory:UInt32 = 0x1 << 1
@@ -69,6 +82,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Add a spawn halos action
         let spawnHalos = SKAction.sequence([SKAction.waitForDuration(2, withRange: 1), SKAction.runBlock({self.spawnHalo()})])
         self.runAction(SKAction.repeatActionForever(spawnHalos))
+        
+        
+        // Display Ammo Status
+        ammoDisplay = SKSpriteNode(imageNamed: "Ammo5")
+        ammoDisplay.anchorPoint = CGPointMake(0.5, 0.0)
+        ammoDisplay.position = cannon.position
+        mainLayer.addChild(ammoDisplay)
+        
+        let incrementAmmo = SKAction.sequence([SKAction.waitForDuration(1), SKAction.runBlock({ self.ammo += 1 })])
+        self.runAction(SKAction.repeatActionForever(incrementAmmo))
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
@@ -101,21 +124,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
  
     func shoot() {
-        let ball =  SKSpriteNode(imageNamed: "Ball")
-        var rotationVector = radiansToVector(cannon.zRotation)
-        ball.name = "ball"
-        ball.position = CGPointMake(cannon.position.x + (cannon.size.width * 0.5 * rotationVector.dx),
-                                    cannon.position.y + (cannon.size.width * 0.5 * rotationVector.dy));
-        mainLayer.addChild(ball)
-        
-        ball.physicsBody = SKPhysicsBody(circleOfRadius: 6.0)
-        ball.physicsBody?.velocity = CGVectorMake(rotationVector.dx * kShootSpeed, rotationVector.dy * kShootSpeed)
-        ball.physicsBody?.restitution = 1.0
-        ball.physicsBody?.linearDamping = 0.0
-        ball.physicsBody?.friction = 0.0
-        
-        ball.physicsBody?.categoryBitMask = kBallCategory
-        ball.physicsBody?.collisionBitMask = kEdgeCategory
+        if ammo > 0 {
+            ammo--
+            
+            let ball =  SKSpriteNode(imageNamed: "Ball")
+            var rotationVector = radiansToVector(cannon.zRotation)
+            ball.name = "ball"
+            ball.position = CGPointMake(cannon.position.x + (cannon.size.width * 0.5 * rotationVector.dx),
+                cannon.position.y + (cannon.size.width * 0.5 * rotationVector.dy));
+            mainLayer.addChild(ball)
+            
+            ball.physicsBody = SKPhysicsBody(circleOfRadius: 6.0)
+            ball.physicsBody?.velocity = CGVectorMake(rotationVector.dx * kShootSpeed, rotationVector.dy * kShootSpeed)
+            ball.physicsBody?.restitution = 1.0
+            ball.physicsBody?.linearDamping = 0.0
+            ball.physicsBody?.friction = 0.0
+            
+            ball.physicsBody?.categoryBitMask = kBallCategory
+            ball.physicsBody?.collisionBitMask = kEdgeCategory
+        }
     }
     
     func spawnHalo() {
@@ -140,8 +167,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func addExplosionToPosition(position: CGPoint) {
-        let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
-        var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        //let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
+        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        
+        var explosion = SKEmitterNode.node()
+        explosion.particleTexture = SKTexture(imageNamed: "Halo")
+        explosion.particleLifetime = 1;
+        explosion.particleBirthRate = 2000;
+        explosion.numParticlesToEmit = 100;
+        explosion.emissionAngleRange = 360;
+        explosion.particleScale = 0.2;
+        explosion.particleScaleSpeed = -0.2;
+        explosion.particleSpeed = 200;
         
         explosion.position = position
         mainLayer.addChild(explosion)
