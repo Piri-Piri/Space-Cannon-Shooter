@@ -54,19 +54,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(background)
         
         // Add Edges
-        let leftEdge = SKNode.node()
+        let leftEdge = SKNode()
         leftEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
         leftEdge.physicsBody?.categoryBitMask = kEdgeCategory
         leftEdge.position = CGPointZero
         self.addChild(leftEdge)
-        let rightEdge = SKNode.node()
+        let rightEdge = SKNode()
         rightEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
         rightEdge.physicsBody?.categoryBitMask = kEdgeCategory
         rightEdge.position = CGPointMake(view.frame.size.width, 0.0)
         self.addChild(rightEdge)
         
         // Add the MainLayer
-        mainLayer = SKNode.node()
+        mainLayer = SKNode()
         self.addChild(mainLayer)
         
         // Add the Cannon
@@ -170,7 +170,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
         //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
         
-        var explosion = SKEmitterNode.node()
+        var explosion = SKEmitterNode()
         explosion.particleTexture = SKTexture(imageNamed: "Halo")
         explosion.particleLifetime = 1;
         explosion.particleBirthRate = 2000;
