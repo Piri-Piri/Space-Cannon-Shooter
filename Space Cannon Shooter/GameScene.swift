@@ -13,6 +13,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var mainLayer: SKNode!
     var cannon: SKSpriteNode!
     var ammoDisplay: SKSpriteNode!
+    var scoreLabel: SKLabelNode!
     
     var ammoValue: Int = 5 // private value
     var ammo: Int {
@@ -26,6 +27,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return ammoValue
         }
     }
+    
+    var scoreValue: Int = 0 // private value
+    var score: Int {
+        set {
+            scoreValue = newValue
+            scoreLabel.text = "Score: \(scoreValue)"
+        }
+        get {
+            return scoreValue
+        }
+    }
+    
+    var isGameOver: Bool = false
+    
 
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
@@ -35,6 +50,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kHaloCategory:UInt32 = 0x1 << 0
     let kBallCategory:UInt32 = 0x1 << 1
     let kEdgeCategory:UInt32 = 0x1 << 2
+    let kShieldCategory:UInt32 = 0x1 << 3
+    let kLifeBarCategory:UInt32 = 0x1 << 4
     
     var didShoot = false
     
@@ -72,7 +89,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Add the Cannon
         cannon = SKSpriteNode(imageNamed: "Cannon")
         cannon.position = CGPointMake(view.frame.size.width * 0.5, 0.0)
-        mainLayer.addChild(cannon)
+        self.addChild(cannon)
         
         // Add a rotate action for the cannon
         let rotateCannon = SKAction.sequence([SKAction.rotateByAngle(CGFloat(M_PI), duration: 2.0), SKAction.rotateByAngle(CGFloat(-M_PI), duration: 2.0)])
@@ -84,14 +101,46 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.runAction(SKAction.repeatActionForever(spawnHalos))
         
         
-        // Display Ammo Status
+        // Add Ammo Status
         ammoDisplay = SKSpriteNode(imageNamed: "Ammo5")
         ammoDisplay.anchorPoint = CGPointMake(0.5, 0.0)
         ammoDisplay.position = cannon.position
-        mainLayer.addChild(ammoDisplay)
+        self.addChild(ammoDisplay)
         
         let incrementAmmo = SKAction.sequence([SKAction.waitForDuration(1), SKAction.runBlock({ self.ammo += 1 })])
         self.runAction(SKAction.repeatActionForever(incrementAmmo))
+        
+        // Setup Score Label
+        scoreLabel = SKLabelNode(fontNamed: "DIN Alternate")
+        scoreLabel.position = CGPointMake(15, 10)
+        scoreLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left
+        scoreLabel.fontSize = 15.0
+        self.addChild(scoreLabel)
+        
+        newGame()
+    }
+    
+    func newGame() {
+        isGameOver = false
+        ammo = 5
+        score = 0
+        mainLayer.removeAllChildren()
+        // Add Shields
+        for var i = 0; i < 6; i++ {
+            let shield = SKSpriteNode(imageNamed: "Block")
+            shield.name = "shield"
+            shield.position = CGPointMake(35.0 + (50.0 * CGFloat(i)), 90)
+            shield.physicsBody = SKPhysicsBody(rectangleOfSize: CGSizeMake(42, 9))
+            shield.physicsBody?.categoryBitMask = kShieldCategory
+            shield.physicsBody?.collisionBitMask = 0
+            mainLayer.addChild(shield)
+        }
+        // Add a Lifebar
+        let lifeBar = SKSpriteNode(imageNamed: "BlueBar")
+        lifeBar.position = CGPointMake(self.view!.frame.size.width * 0.5, 70)
+        lifeBar.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointMake(-lifeBar.size.width * 0.5, 0), toPoint: CGPointMake(lifeBar.size.width * 0.5, 0))
+        lifeBar.physicsBody?.categoryBitMask = kLifeBarCategory
+        mainLayer.addChild(lifeBar)
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
@@ -124,7 +173,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
  
     func shoot() {
-        if ammo > 0 {
+        if ammo > 0 && !isGameOver {
             ammo--
             
             let ball =  SKSpriteNode(imageNamed: "Ball")
@@ -142,6 +191,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             ball.physicsBody?.categoryBitMask = kBallCategory
             ball.physicsBody?.collisionBitMask = kEdgeCategory
+            ball.physicsBody?.contactTestBitMask = kEdgeCategory
         }
     }
     
@@ -159,26 +209,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         halo.physicsBody?.categoryBitMask = kHaloCategory
         halo.physicsBody?.collisionBitMask = kEdgeCategory | kHaloCategory
-        halo.physicsBody?.contactTestBitMask = kBallCategory
-        
+        halo.physicsBody?.contactTestBitMask = kBallCategory | kShieldCategory | kLifeBarCategory
         
         mainLayer.addChild(halo)
     }
     
+    func addBounceExplosionToPosition(position: CGPoint) {
+        //let explosionPath = NSBundle.mainBundle().pathForResource("BounceExplosion", ofType: "sks")
+        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        
+        var explosion = SKEmitterNode()
+        explosion.particleTexture = SKTexture(imageNamed: "Ball")
+        explosion.particleLifetime = 1
+        explosion.particleBirthRate = 2000
+        explosion.numParticlesToEmit = 100
+        explosion.emissionAngle = 0
+        explosion.emissionAngleRange = 360
+        explosion.particleScale = 0.2
+        explosion.particleScaleRange = 0.2
+        explosion.particleScaleSpeed = -0.2
+        explosion.particleSpeed = 200
+        explosion.particleSpeedRange = 200
+        
+        explosion.position = position
+        mainLayer.addChild(explosion)
+    }
     
-    func addExplosionToPosition(position: CGPoint) {
+    func addHaloExplosionToPosition(position: CGPoint) {
         //let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
         //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
         
         var explosion = SKEmitterNode()
         explosion.particleTexture = SKTexture(imageNamed: "Halo")
-        explosion.particleLifetime = 1;
-        explosion.particleBirthRate = 2000;
-        explosion.numParticlesToEmit = 100;
-        explosion.emissionAngleRange = 360;
-        explosion.particleScale = 0.2;
-        explosion.particleScaleSpeed = -0.2;
-        explosion.particleSpeed = 200;
+        explosion.particleLifetime = 1
+        explosion.particleBirthRate = 2000
+        explosion.numParticlesToEmit = 100
+        explosion.emissionAngle = 0
+        explosion.emissionAngleRange = 360
+        explosion.particleScale = 0.2
+        explosion.particleScaleRange = 0.2
+        explosion.particleScaleSpeed = -0.2
+        explosion.particleSpeed = 200
+        explosion.particleSpeedRange = 200
         
         explosion.position = position
         mainLayer.addChild(explosion)
@@ -186,8 +258,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let removeExplosion = SKAction.sequence([SKAction.waitForDuration(1.5), SKAction.removeFromParent()])
         explosion.runAction(removeExplosion)
     }
+    
+    func addLifeBarExplosionToPosition(position: CGPoint) {
+        //let explosionPath = NSBundle.mainBundle().pathForResource("LifeBarExplosion", ofType: "sks")
+        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        
+        var explosion = SKEmitterNode()
+        explosion.particleTexture = SKTexture(imageNamed: "BlueBar")
+        explosion.particleLifetime = 1
+        explosion.particleBirthRate = 5000
+        explosion.numParticlesToEmit = 800
+        explosion.emissionAngle = 90
+        explosion.emissionAngleRange = 360
+        explosion.particleScale = 0.1
+        explosion.particleScaleRange = 0.2
+        explosion.particleScaleSpeed = -0.4
+        explosion.particleSpeed = 300
+        explosion.particleSpeedRange = 200
+        
+        explosion.position = position
+        mainLayer.addChild(explosion)
+    }
 
-    // MARK: SKPhysicsContactDelegate 
+    func gameOver() {
+        isGameOver = true
+        mainLayer.enumerateChildNodesWithName("halo", usingBlock: { (node, stop) -> Void in
+            self.addHaloExplosionToPosition(node.position)
+            node.removeFromParent()
+        })
+        mainLayer.enumerateChildNodesWithName("ball", usingBlock: { (node, stop) -> Void in
+            node.removeFromParent()
+        })
+        mainLayer.enumerateChildNodesWithName("shield", usingBlock: { (node, stop) -> Void in
+            node.removeFromParent()
+        })
+        self.runAction(SKAction.sequence([SKAction.waitForDuration(1.5), SKAction.runBlock({ self.newGame() })]))
+    }
+    
+    // MARK: SKPhysicsContactDelegate
     
     func didBeginContact(contact: SKPhysicsContact) {
         var firstBody:SKPhysicsBody
@@ -203,12 +311,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             secondBody = contact.bodyA
         }
         
+        if firstBody.categoryBitMask == kBallCategory && secondBody.categoryBitMask == kEdgeCategory {
+            // ball bounce effect an the side egdes
+            if firstBody.node != nil {
+                self.addBounceExplosionToPosition(firstBody.node!.position)
+            }
+        }
+        
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
-            
-            self.addExplosionToPosition(firstBody.node!.position)
+            // Collision halo and ball
+            if firstBody.node != nil {
+                self.addHaloExplosionToPosition(firstBody.node!.position)
+            }
             
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
+            score++
+        }
+        
+        if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kShieldCategory {
+            // Collision halo and shield
+            if firstBody.node != nil {
+                self.addHaloExplosionToPosition(firstBody.node!.position)
+            }
+            
+            firstBody.node?.removeFromParent()
+            secondBody.node?.removeFromParent()
+        }
+        
+        if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kLifeBarCategory {
+            // Collision halo and lifebar
+            if firstBody.node != nil {
+                self.addLifeBarExplosionToPosition(secondBody.node!.position)
+            }
+            
+            secondBody.node?.removeFromParent()
+            gameOver()
         }
     }
     
