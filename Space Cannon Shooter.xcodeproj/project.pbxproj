@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63C2078219E518C200BEADDD /* Bounce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077D19E518C200BEADDD /* Bounce.caf */; };
+		63C2078319E518C200BEADDD /* DeepExplosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077E19E518C200BEADDD /* DeepExplosion.caf */; };
+		63C2078419E518C200BEADDD /* Explosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077F19E518C200BEADDD /* Explosion.caf */; };
+		63C2078519E518C200BEADDD /* Laser.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078019E518C200BEADDD /* Laser.caf */; };
+		63C2078619E518C200BEADDD /* Zap.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078119E518C200BEADDD /* Zap.caf */; };
+		63C2078819E541AA00BEADDD /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2078719E541AA00BEADDD /* Menu.swift */; };
+		63C2078D19E545EB00BEADDD /* PlayButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078A19E545EB00BEADDD /* PlayButton@2x.png */; };
+		63C2078E19E545EB00BEADDD /* ScoreBoard@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */; };
+		63C2078F19E545EB00BEADDD /* Title@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078C19E545EB00BEADDD /* Title@2x.png */; };
 		63D8300A19E0AA3000D9EF69 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D8300919E0AA3000D9EF69 /* AppDelegate.swift */; };
 		63D8300C19E0AA3000D9EF69 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 63D8300B19E0AA3000D9EF69 /* GameScene.sks */; };
 		63D8300E19E0AA3000D9EF69 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D8300D19E0AA3000D9EF69 /* GameScene.swift */; };
@@ -40,6 +49,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		63C2077D19E518C200BEADDD /* Bounce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bounce.caf; sourceTree = "<group>"; };
+		63C2077E19E518C200BEADDD /* DeepExplosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DeepExplosion.caf; sourceTree = "<group>"; };
+		63C2077F19E518C200BEADDD /* Explosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Explosion.caf; sourceTree = "<group>"; };
+		63C2078019E518C200BEADDD /* Laser.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Laser.caf; sourceTree = "<group>"; };
+		63C2078119E518C200BEADDD /* Zap.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Zap.caf; sourceTree = "<group>"; };
+		63C2078719E541AA00BEADDD /* Menu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
+		63C2078A19E545EB00BEADDD /* PlayButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PlayButton@2x.png"; sourceTree = "<group>"; };
+		63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ScoreBoard@2x.png"; sourceTree = "<group>"; };
+		63C2078C19E545EB00BEADDD /* Title@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Title@2x.png"; sourceTree = "<group>"; };
 		63D8300419E0AA3000D9EF69 /* Space Cannon Shooter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Cannon Shooter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		63D8300819E0AA3000D9EF69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63D8300919E0AA3000D9EF69 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +102,48 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		63C2077B19E515A000BEADDD /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				63C2078919E545DC00BEADDD /* Menu */,
+				63D8302D19E0AA5200D9EF69 /* Ammo0@2x.png */,
+				63D8302E19E0AA5200D9EF69 /* Ammo1@2x.png */,
+				63D8302F19E0AA5200D9EF69 /* Ammo2@2x.png */,
+				63D8303019E0AA5200D9EF69 /* Ammo3@2x.png */,
+				63D8303119E0AA5200D9EF69 /* Ammo4@2x.png */,
+				63D8303219E0AA5200D9EF69 /* Ammo5@2x.png */,
+				63D8303319E0AA5200D9EF69 /* Ball@2x.png */,
+				63D8303419E0AA5200D9EF69 /* Block@2x.png */,
+				63D8303519E0AA5200D9EF69 /* BlueBar@2x.png */,
+				63D8303619E0AA5200D9EF69 /* Cannon@2x.png */,
+				63D8303719E0AA5200D9EF69 /* Halo@2x.png */,
+				63D8303819E0AA5200D9EF69 /* Starfield@2x.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
+		63C2077C19E515AD00BEADDD /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				63C2077D19E518C200BEADDD /* Bounce.caf */,
+				63C2077E19E518C200BEADDD /* DeepExplosion.caf */,
+				63C2077F19E518C200BEADDD /* Explosion.caf */,
+				63C2078019E518C200BEADDD /* Laser.caf */,
+				63C2078119E518C200BEADDD /* Zap.caf */,
+			);
+			name = Sounds;
+			sourceTree = "<group>";
+		};
+		63C2078919E545DC00BEADDD /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				63C2078A19E545EB00BEADDD /* PlayButton@2x.png */,
+				63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */,
+				63C2078C19E545EB00BEADDD /* Title@2x.png */,
+			);
+			name = Menu;
+			sourceTree = "<group>";
+		};
 		63D82FFB19E0AA3000D9EF69 = {
 			isa = PBXGroup;
 			children = (
@@ -106,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				63D8300919E0AA3000D9EF69 /* AppDelegate.swift */,
+				63C2078719E541AA00BEADDD /* Menu.swift */,
 				63D8300B19E0AA3000D9EF69 /* GameScene.sks */,
 				63D8300D19E0AA3000D9EF69 /* GameScene.swift */,
 				63D8300F19E0AA3000D9EF69 /* GameViewController.swift */,
@@ -120,18 +181,8 @@
 		63D8300719E0AA3000D9EF69 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				63D8302D19E0AA5200D9EF69 /* Ammo0@2x.png */,
-				63D8302E19E0AA5200D9EF69 /* Ammo1@2x.png */,
-				63D8302F19E0AA5200D9EF69 /* Ammo2@2x.png */,
-				63D8303019E0AA5200D9EF69 /* Ammo3@2x.png */,
-				63D8303119E0AA5200D9EF69 /* Ammo4@2x.png */,
-				63D8303219E0AA5200D9EF69 /* Ammo5@2x.png */,
-				63D8303319E0AA5200D9EF69 /* Ball@2x.png */,
-				63D8303419E0AA5200D9EF69 /* Block@2x.png */,
-				63D8303519E0AA5200D9EF69 /* BlueBar@2x.png */,
-				63D8303619E0AA5200D9EF69 /* Cannon@2x.png */,
-				63D8303719E0AA5200D9EF69 /* Halo@2x.png */,
-				63D8303819E0AA5200D9EF69 /* Starfield@2x.png */,
+				63C2077C19E515AD00BEADDD /* Sounds */,
+				63C2077B19E515A000BEADDD /* Images */,
 				63D8300819E0AA3000D9EF69 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -236,16 +287,24 @@
 			files = (
 				63D8303E19E0AA5200D9EF69 /* Ammo5@2x.png in Resources */,
 				63D8303F19E0AA5200D9EF69 /* Ball@2x.png in Resources */,
+				63C2078319E518C200BEADDD /* DeepExplosion.caf in Resources */,
 				63D8301819E0AA3000D9EF69 /* LaunchScreen.xib in Resources */,
+				63C2078D19E545EB00BEADDD /* PlayButton@2x.png in Resources */,
+				63C2078519E518C200BEADDD /* Laser.caf in Resources */,
 				63D8304119E0AA5200D9EF69 /* BlueBar@2x.png in Resources */,
+				63C2078619E518C200BEADDD /* Zap.caf in Resources */,
 				63D8303D19E0AA5200D9EF69 /* Ammo4@2x.png in Resources */,
 				63D8304019E0AA5200D9EF69 /* Block@2x.png in Resources */,
 				63D8303919E0AA5200D9EF69 /* Ammo0@2x.png in Resources */,
+				63C2078F19E545EB00BEADDD /* Title@2x.png in Resources */,
+				63C2078419E518C200BEADDD /* Explosion.caf in Resources */,
 				63D8303A19E0AA5200D9EF69 /* Ammo1@2x.png in Resources */,
 				63D8301519E0AA3000D9EF69 /* Images.xcassets in Resources */,
+				63C2078E19E545EB00BEADDD /* ScoreBoard@2x.png in Resources */,
 				63D8300C19E0AA3000D9EF69 /* GameScene.sks in Resources */,
 				63D8301319E0AA3000D9EF69 /* Main.storyboard in Resources */,
 				63D8304419E0AA5200D9EF69 /* Starfield@2x.png in Resources */,
+				63C2078219E518C200BEADDD /* Bounce.caf in Resources */,
 				63D8303C19E0AA5200D9EF69 /* Ammo3@2x.png in Resources */,
 				63D8304319E0AA5200D9EF69 /* Halo@2x.png in Resources */,
 				63D8303B19E0AA5200D9EF69 /* Ammo2@2x.png in Resources */,
@@ -269,6 +328,7 @@
 			files = (
 				63D8300E19E0AA3000D9EF69 /* GameScene.swift in Sources */,
 				63D8301019E0AA3000D9EF69 /* GameViewController.swift in Sources */,
+				63C2078819E541AA00BEADDD /* Menu.swift in Sources */,
 				63D8300A19E0AA3000D9EF69 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
