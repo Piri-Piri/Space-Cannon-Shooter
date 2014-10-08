@@ -10,8 +10,6 @@ import UIKit
 import SpriteKit
 
 class Menu: SKNode {
-
-    var test : String = ""
     
     var scoreLabel: SKLabelNode!
     var topScoreLabel: SKLabelNode!

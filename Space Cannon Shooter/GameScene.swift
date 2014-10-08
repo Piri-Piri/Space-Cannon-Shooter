@@ -22,7 +22,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var laserSound: SKAction!
     var zapSound: SKAction!
     
-    var ammoValue: Int = 0 // private value
+    let kShootSpeed: CGFloat = 1000.0
+    let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
+    let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
+    let KHaloSpeed: CGFloat = 100.0
+    
+    let kHaloCategory:UInt32 = 0x1 << 0
+    let kBallCategory:UInt32 = 0x1 << 1
+    let kEdgeCategory:UInt32 = 0x1 << 2
+    let kShieldCategory:UInt32 = 0x1 << 3
+    let kLifebarCategory:UInt32 = 0x1 << 4
+    
+    let kTopScoreKey:String = "topScore"
+    let userDefaults = NSUserDefaults.standardUserDefaults()
+    
+    private var ammoValue: Int = 0 // private value
     var ammo: Int {
         set {
             if newValue >= 0 && newValue <= 5 {
@@ -47,18 +61,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     var isGameOver: Bool = true
-
-    let kShootSpeed: CGFloat = 1000.0
-    let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
-    let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
-    let KHaloSpeed: CGFloat = 100.0
-    
-    let kHaloCategory:UInt32 = 0x1 << 0
-    let kBallCategory:UInt32 = 0x1 << 1
-    let kEdgeCategory:UInt32 = 0x1 << 2
-    let kShieldCategory:UInt32 = 0x1 << 3
-    let kLifeBarCategory:UInt32 = 0x1 << 4
-    
     var didShoot = false
     
     override func didMoveToView(view: SKView) {
@@ -77,13 +79,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(background)
         
         // Add Edges
+        /* Notice: the top has some additional space (100) to avoid a collision on spawn near to the top */
         let leftEdge = SKNode()
-        leftEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
+        leftEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height + 100))
         leftEdge.physicsBody?.categoryBitMask = kEdgeCategory
         leftEdge.position = CGPointZero
         self.addChild(leftEdge)
         let rightEdge = SKNode()
-        rightEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height))
+        rightEdge.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointZero, toPoint: CGPointMake(0.0, view.frame.size.height + 100))
         rightEdge.physicsBody?.categoryBitMask = kEdgeCategory
         rightEdge.position = CGPointMake(view.frame.size.width, 0.0)
         self.addChild(rightEdge)
@@ -104,7 +107,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Add a spawn halos action
         let spawnHalos = SKAction.sequence([SKAction.waitForDuration(2, withRange: 1), SKAction.runBlock({self.spawnHalo()})])
-        self.runAction(SKAction.repeatActionForever(spawnHalos))
+        self.runAction(SKAction.repeatActionForever(spawnHalos), withKey: "spawnHalo")
         
         
         // Add Ammo Status
@@ -140,15 +143,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score = 0
         isGameOver = true
         scoreLabel.hidden = true
+        
+        // Load UserDefaults
+        menu.topScore = userDefaults.integerForKey(kTopScoreKey)
     }
     
     func newGame() {
-        scoreLabel.hidden = false
-        isGameOver = false
-        menu.hidden = true
-        ammo = 5
-        score = 0
-        
         mainLayer.removeAllChildren()
         
         // Add Shields
@@ -161,17 +161,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             shield.physicsBody?.collisionBitMask = 0
             mainLayer.addChild(shield)
         }
-        // Add a Lifebar
-        let lifeBar = SKSpriteNode(imageNamed: "BlueBar")
-        lifeBar.position = CGPointMake(self.view!.frame.size.width * 0.5, 70)
-        lifeBar.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointMake(-lifeBar.size.width * 0.5, 0), toPoint: CGPointMake(lifeBar.size.width * 0.5, 0))
-        lifeBar.physicsBody?.categoryBitMask = kLifeBarCategory
-        mainLayer.addChild(lifeBar)
+        
+        // Add Lifebar
+        let lifebar = SKSpriteNode(imageNamed: "BlueBar")
+        lifebar.position = CGPointMake(self.view!.frame.size.width * 0.5, 70)
+        lifebar.physicsBody = SKPhysicsBody(edgeFromPoint: CGPointMake(-lifebar.size.width * 0.5, 0), toPoint: CGPointMake(lifebar.size.width * 0.5, 0))
+        lifebar.physicsBody?.categoryBitMask = kLifebarCategory
+        mainLayer.addChild(lifebar)
+        
+        // Set initial valuse
+        self.actionForKey("spawnHalo")?.speed = 1.0
+        ammo = 5
+        score = 0
+        scoreLabel.hidden = false
+        menu.hidden = true
+        isGameOver = false
     }
     
     func gameOver() {
         mainLayer.enumerateChildNodesWithName("halo", usingBlock: { (node, stop) -> Void in
-            self.addHaloExplosionToPosition(node.position)
+            self.addExplosion("HaloExplosion", position: node.position)
             node.removeFromParent()
         })
         mainLayer.enumerateChildNodesWithName("ball", usingBlock: { (node, stop) -> Void in
@@ -185,6 +194,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         menu.score = score
         if score > menu.topScore {
             menu.topScore = score
+            userDefaults.setInteger(score, forKey: kTopScoreKey)
+            userDefaults.synchronize()
         }
         menu.hidden = false
         scoreLabel.hidden = true
@@ -227,7 +238,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         mainLayer.enumerateChildNodesWithName("ball", usingBlock: { (node, stop) -> Void in
+            if node.respondsToSelector(Selector("updateTrail")) {
+                (node as Ball).updateTrail()
+            }
             if !CGRectContainsPoint(self.frame, node.position) {
+                node.removeFromParent()
+            }
+        })
+        
+        mainLayer.enumerateChildNodesWithName("halo", usingBlock: { (node, stop) -> Void in
+            if node.position.y + node.frame.size.height < 0 {
                 node.removeFromParent()
             }
         })
@@ -235,8 +255,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
  
     func shoot() {
         if ammo > 0 {
-            let ball =  SKSpriteNode(imageNamed: "Ball")
-            var rotationVector = radiansToVector(cannon.zRotation)
+            ammo--
+            
+            // Create a ball node
+            let ball = Ball(imageNamed: "Ball")
+            let rotationVector = radiansToVector(cannon.zRotation)
             ball.name = "ball"
             ball.position = CGPointMake(cannon.position.x + (cannon.size.width * 0.5 * rotationVector.dx),
                 cannon.position.y + (cannon.size.width * 0.5 * rotationVector.dy));
@@ -253,11 +276,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ball.physicsBody?.contactTestBitMask = kEdgeCategory
             self.runAction(laserSound)
             
-            ammo--
+            // Create ball trail effect
+            let ballTrailPath = NSBundle.mainBundle().pathForResource("BallTrail", ofType: "sks")
+            let ballTrail = NSKeyedUnarchiver.unarchiveObjectWithFile(ballTrailPath!) as SKEmitterNode
+            ballTrail.targetNode = mainLayer
+            mainLayer.addChild(ballTrail)
+            
+            /* handle trail inside the ball class*/
+            ball.trail = ballTrail
         }
     }
     
     func spawnHalo() {
+        // Increase spawn speed
+        let spawnHaloAction = self.actionForKey("spawnHalo")
+        if spawnHaloAction?.speed < 1.5 {
+            spawnHaloAction?.speed += 0.01
+        }
+        
+        // Create halo node
         let halo = SKSpriteNode(imageNamed: "Halo")
         halo.name = "halo"
         halo.position = CGPointMake(randomInRange(halo.size.width * 0.5, high: self.frame.width - (halo.size.width * 0.5)), self.frame.height + (halo.size.height * 0.5))
@@ -271,72 +308,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         halo.physicsBody?.categoryBitMask = kHaloCategory
         halo.physicsBody?.collisionBitMask = kEdgeCategory | kHaloCategory
-        halo.physicsBody?.contactTestBitMask = kBallCategory | kShieldCategory | kLifeBarCategory | kEdgeCategory
+        halo.physicsBody?.contactTestBitMask = kBallCategory | kShieldCategory | kLifebarCategory | kEdgeCategory
         
         mainLayer.addChild(halo)
     }
     
-    func addBounceExplosionToPosition(position: CGPoint) {
-        //let explosionPath = NSBundle.mainBundle().pathForResource("BounceExplosion", ofType: "sks")
-        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
-        
-        var explosion = SKEmitterNode()
-        explosion.particleTexture = SKTexture(imageNamed: "Ball")
-        explosion.particleLifetime = 1
-        explosion.particleBirthRate = 2000
-        explosion.numParticlesToEmit = 100
-        explosion.emissionAngle = 0
-        explosion.emissionAngleRange = 360
-        explosion.particleScale = 0.2
-        explosion.particleScaleRange = 0.2
-        explosion.particleScaleSpeed = -0.2
-        explosion.particleSpeed = 200
-        explosion.particleSpeedRange = 200
-        
-        explosion.position = position
-        mainLayer.addChild(explosion)
-    }
-    
-    func addHaloExplosionToPosition(position: CGPoint) {
-        //let explosionPath = NSBundle.mainBundle().pathForResource("HaloExplosion", ofType: "sks")
-        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
-        
-        var explosion = SKEmitterNode()
-        explosion.particleTexture = SKTexture(imageNamed: "Halo")
-        explosion.particleLifetime = 1
-        explosion.particleBirthRate = 2000
-        explosion.numParticlesToEmit = 100
-        explosion.emissionAngle = 0
-        explosion.emissionAngleRange = 360
-        explosion.particleScale = 0.2
-        explosion.particleScaleRange = 0.2
-        explosion.particleScaleSpeed = -0.2
-        explosion.particleSpeed = 200
-        explosion.particleSpeedRange = 200
-        
-        explosion.position = position
-        mainLayer.addChild(explosion)
-        
-        let removeExplosion = SKAction.sequence([SKAction.waitForDuration(1.5), SKAction.removeFromParent()])
-        explosion.runAction(removeExplosion)
-    }
-    
-    func addLifeBarExplosionToPosition(position: CGPoint) {
-        //let explosionPath = NSBundle.mainBundle().pathForResource("LifeBarExplosion", ofType: "sks")
-        //var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
-        
-        var explosion = SKEmitterNode()
-        explosion.particleTexture = SKTexture(imageNamed: "BlueBar")
-        explosion.particleLifetime = 1
-        explosion.particleBirthRate = 5000
-        explosion.numParticlesToEmit = 800
-        explosion.emissionAngle = 90
-        explosion.emissionAngleRange = 360
-        explosion.particleScale = 0.1
-        explosion.particleScaleRange = 0.2
-        explosion.particleScaleSpeed = -0.4
-        explosion.particleSpeed = 300
-        explosion.particleSpeedRange = 200
+    func addExplosion(name: String, position: CGPoint) {
+        let explosionPath = NSBundle.mainBundle().pathForResource(name, ofType: "sks")
+        var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
         
         explosion.position = position
         mainLayer.addChild(explosion)
@@ -368,17 +347,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if firstBody.categoryBitMask == kBallCategory && secondBody.categoryBitMask == kEdgeCategory {
             // ball bounce effect an the side egdes
             if firstBody.node != nil {
-                self.addBounceExplosionToPosition(firstBody.node!.position)
+                self.addExplosion("BounceExplosion", position: firstBody.node!.position)
                 self.runAction(bounceSound)
             }
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
             // Collision halo and ball
+            /* avoid multiple explosion at one time */
             if firstBody.node != nil {
-                self.addHaloExplosionToPosition(firstBody.node!.position)
+                self.addExplosion("HaloExplosion", position: firstBody.node!.position)
                 self.runAction(explosionSound)
             }
+            
+            /* avoid multiple shield destroy at one time */
+            firstBody.node?.physicsBody?.categoryBitMask = 0
             
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
@@ -387,19 +370,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kShieldCategory {
             // Collision halo and shield
+            /* avoid multiple explosion at one time */
             if firstBody.node != nil {
-                self.addHaloExplosionToPosition(firstBody.node!.position)
+                self.addExplosion("HaloExplosion", position: firstBody.node!.position)
                 self.runAction(explosionSound)
             }
+            
+            /* avoid multiple shield destroy at one time */
+            firstBody.node?.physicsBody?.categoryBitMask = 0
             
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
         }
         
-        if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kLifeBarCategory {
+        if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kLifebarCategory {
             // Collision halo and lifebar
             if firstBody.node != nil {
-                self.addLifeBarExplosionToPosition(secondBody.node!.position)
+                self.addExplosion("HaloExplosion", position: firstBody.node!.position)
+                self.addExplosion("LifebarExplosion", position: secondBody.node!.position)
                 self.runAction(deepExplosionSound)
             }
             
