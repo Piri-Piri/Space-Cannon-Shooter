@@ -13,6 +13,8 @@
 		632CDB7B19E5E6CA0081E589 /* BounceExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 632CDB7A19E5E6CA0081E589 /* BounceExplosion.sks */; };
 		632CDB7D19E5E86E0081E589 /* HaloExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 632CDB7C19E5E86E0081E589 /* HaloExplosion.sks */; };
 		632CDB7F19E5EE140081E589 /* LifebarExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 632CDB7E19E5EE140081E589 /* LifebarExplosion.sks */; };
+		634A743F19E69CE6007402BD /* HaloX@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 634A743E19E69CE6007402BD /* HaloX@2x.png */; };
+		634A744119E69CF1007402BD /* HaloBomb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 634A744019E69CF1007402BD /* HaloBomb@2x.png */; };
 		63C2078219E518C200BEADDD /* Bounce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077D19E518C200BEADDD /* Bounce.caf */; };
 		63C2078319E518C200BEADDD /* DeepExplosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077E19E518C200BEADDD /* DeepExplosion.caf */; };
 		63C2078419E518C200BEADDD /* Explosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077F19E518C200BEADDD /* Explosion.caf */; };
@@ -61,6 +63,8 @@
 		632CDB7A19E5E6CA0081E589 /* BounceExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = BounceExplosion.sks; sourceTree = "<group>"; };
 		632CDB7C19E5E86E0081E589 /* HaloExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = HaloExplosion.sks; sourceTree = "<group>"; };
 		632CDB7E19E5EE140081E589 /* LifebarExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = LifebarExplosion.sks; sourceTree = "<group>"; };
+		634A743E19E69CE6007402BD /* HaloX@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "HaloX@2x.png"; sourceTree = "<group>"; };
+		634A744019E69CF1007402BD /* HaloBomb@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "HaloBomb@2x.png"; sourceTree = "<group>"; };
 		63C2077D19E518C200BEADDD /* Bounce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bounce.caf; sourceTree = "<group>"; };
 		63C2077E19E518C200BEADDD /* DeepExplosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DeepExplosion.caf; sourceTree = "<group>"; };
 		63C2077F19E518C200BEADDD /* Explosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Explosion.caf; sourceTree = "<group>"; };
@@ -141,6 +145,8 @@
 				63D8303519E0AA5200D9EF69 /* BlueBar@2x.png */,
 				63D8303619E0AA5200D9EF69 /* Cannon@2x.png */,
 				63D8303719E0AA5200D9EF69 /* Halo@2x.png */,
+				634A743E19E69CE6007402BD /* HaloX@2x.png */,
+				634A744019E69CF1007402BD /* HaloBomb@2x.png */,
 				63D8303819E0AA5200D9EF69 /* Starfield@2x.png */,
 			);
 			name = Images;
@@ -336,6 +342,8 @@
 				632CDB7D19E5E86E0081E589 /* HaloExplosion.sks in Resources */,
 				632CDB7B19E5E6CA0081E589 /* BounceExplosion.sks in Resources */,
 				63D8303C19E0AA5200D9EF69 /* Ammo3@2x.png in Resources */,
+				634A744119E69CF1007402BD /* HaloBomb@2x.png in Resources */,
+				634A743F19E69CE6007402BD /* HaloX@2x.png in Resources */,
 				632CDB7519E5C6860081E589 /* BallTrail.sks in Resources */,
 				63D8304319E0AA5200D9EF69 /* Halo@2x.png in Resources */,
 				63D8303B19E0AA5200D9EF69 /* Ammo2@2x.png in Resources */,

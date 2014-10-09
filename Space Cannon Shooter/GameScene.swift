@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var cannon: SKSpriteNode!
     var ammoDisplay: SKSpriteNode!
     var scoreLabel: SKLabelNode!
+    var multiplierLabel: SKLabelNode!
     
     var bounceSound: SKAction!
     var deepExplosionSound: SKAction!
@@ -25,7 +26,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
     let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
-    let KHaloSpeed: CGFloat = 100.0
+    let KHaloSpeed: CGFloat = 10.0
     
     let kHaloCategory:UInt32 = 0x1 << 0
     let kBallCategory:UInt32 = 0x1 << 1
@@ -33,8 +34,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kShieldCategory:UInt32 = 0x1 << 3
     let kLifebarCategory:UInt32 = 0x1 << 4
     
-    let kTopScoreKey:String = "topScore"
+    let kTopScoreKey = "topScore"
     let userDefaults = NSUserDefaults.standardUserDefaults()
+    let kMultiplierKey = "Multiplier"
     
     private var ammoValue: Int = 0 // private value
     var ammo: Int {
@@ -49,7 +51,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    var scoreValue: Int = 0 // private value
+    private var scoreValue: Int = 0 // private value
     var score: Int {
         set {
             scoreValue = newValue
@@ -57,6 +59,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         get {
             return scoreValue
+        }
+    }
+    
+    private var multiplierValue: Int = 0 // private value
+    var multiplier: Int {
+        set {
+            multiplierValue = newValue
+            multiplierLabel.text = "Points: x\(multiplierValue)"
+        }
+        get {
+            return multiplierValue
         }
     }
     
@@ -126,6 +139,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 15.0
         self.addChild(scoreLabel)
         
+        // Setup Point Label
+        multiplierLabel = SKLabelNode(fontNamed: "DIN Alternate")
+        multiplierLabel.position = CGPointMake(15, 30)
+        multiplierLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left
+        multiplierLabel.fontSize = 15.0
+        self.addChild(multiplierLabel)
+        
         // Setup Sounds
         bounceSound = SKAction.playSoundFileNamed("Bounce.caf", waitForCompletion: false)
         deepExplosionSound = SKAction.playSoundFileNamed("DeepExplosion.caf", waitForCompletion: false)
@@ -141,8 +161,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Set initial values
         ammo = 5
         score = 0
+        multiplier = 1
         isGameOver = true
         scoreLabel.hidden = true
+        multiplierLabel.hidden = true
         
         // Load UserDefaults
         menu.topScore = userDefaults.integerForKey(kTopScoreKey)
@@ -173,7 +195,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.actionForKey("spawnHalo")?.speed = 1.0
         ammo = 5
         score = 0
+        multiplier = 1
         scoreLabel.hidden = false
+        multiplierLabel.hidden = false
         menu.hidden = true
         isGameOver = false
     }
@@ -199,6 +223,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         menu.hidden = false
         scoreLabel.hidden = true
+        multiplierLabel.hidden = true
         isGameOver = true
     }
     
@@ -243,6 +268,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             if !CGRectContainsPoint(self.frame, node.position) {
                 node.removeFromParent()
+                self.multiplier = 1
             }
         })
         
@@ -310,6 +336,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         halo.physicsBody?.collisionBitMask = kEdgeCategory | kHaloCategory
         halo.physicsBody?.contactTestBitMask = kBallCategory | kShieldCategory | kLifebarCategory | kEdgeCategory
         
+        // Random point multiplier
+        if !isGameOver && arc4random_uniform(UInt32(6)) == 0 {
+            halo.texture = SKTexture(imageNamed: "HaloX")
+            halo.userData = NSMutableDictionary()
+            halo.userData?.setValue(true, forKey: kMultiplierKey)
+        }
+        
         mainLayer.addChild(halo)
     }
     
@@ -349,10 +382,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if firstBody.node != nil {
                 self.addExplosion("BounceExplosion", position: firstBody.node!.position)
                 self.runAction(bounceSound)
+                
+                if firstBody.node!.isKindOfClass(Ball) {
+                    (firstBody.node! as Ball).bounces++
+                    if (firstBody.node! as Ball).bounces > 3 {
+                        firstBody.node!.removeFromParent()
+                        multiplier = 1
+                    }
+                }
             }
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
+            score += multiplier
             // Collision halo and ball
             /* avoid multiple explosion at one time */
             if firstBody.node != nil {
@@ -360,12 +402,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 self.runAction(explosionSound)
             }
             
+            if firstBody.node?.userData?.valueForKey(kMultiplierKey)?.boolValue == true {
+               multiplier++
+            }
+            
             /* avoid multiple shield destroy at one time */
             firstBody.node?.physicsBody?.categoryBitMask = 0
             
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
-            score++
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kShieldCategory {
@@ -385,8 +430,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kLifebarCategory {
             // Collision halo and lifebar
+            /* avoid multiple explosion at one time */
             if firstBody.node != nil {
-                self.addExplosion("HaloExplosion", position: firstBody.node!.position)
                 self.addExplosion("LifebarExplosion", position: secondBody.node!.position)
                 self.runAction(deepExplosionSound)
             }
