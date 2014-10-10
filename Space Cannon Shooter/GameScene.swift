@@ -7,13 +7,17 @@
 //
 
 import SpriteKit
+import AVFoundation
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var audioPlayer: AVAudioPlayer!
     var mainLayer: SKNode!
     var menu: Menu!
     var cannon: SKSpriteNode!
     var ammoDisplay: SKSpriteNode!
+    var pauseButton: SKSpriteNode!
+    var resumeButton: SKSpriteNode!
     var scoreLabel: SKLabelNode!
     var multiplierLabel: SKLabelNode!
     
@@ -45,38 +49,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var shieldPool: NSMutableArray!
     
-    private var ammoValue: Int = 0 // private value
-    var ammo: Int {
-        set {
-            if newValue >= 0 && newValue <= 5 {
-                ammoValue = newValue
-                ammoDisplay.texture = SKTexture(imageNamed: "Ammo\(ammoValue)")
+    var ammo: Int = 0 {
+        didSet {
+            if ammo >= 0 && ammo <= 5 {
+                ammoDisplay.texture = SKTexture(imageNamed: "Ammo\(ammo)")
+            }
+            else {
+                ammo = oldValue
             }
         }
-        get {
-            return ammoValue
+    }
+    
+    var score: Int = 0 {
+        didSet {
+            scoreLabel.text = "Score: \(score)"
+        }
+
+    }
+    
+    var multiplier: Int = 0 {
+        didSet {
+            multiplierLabel.text = "Points: x\(multiplier)"
         }
     }
     
-    private var scoreValue: Int = 0 // private value
-    var score: Int {
-        set {
-            scoreValue = newValue
-            scoreLabel.text = "Score: \(scoreValue)"
+    var isGamePaused: Bool = false {
+        willSet{
+            println(newValue)
         }
-        get {
-            return scoreValue
-        }
-    }
-    
-    private var multiplierValue: Int = 0 // private value
-    var multiplier: Int {
-        set {
-            multiplierValue = newValue
-            multiplierLabel.text = "Points: x\(multiplierValue)"
-        }
-        get {
-            return multiplierValue
+        didSet{
+            if !isGameOver {
+                pauseButton.hidden = isGamePaused
+                resumeButton.hidden = !isGamePaused
+                
+                // pause/resume the whole scene
+                self.paused = isGamePaused
+            }
         }
     }
     
@@ -172,6 +180,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         multiplierLabel.fontSize = 15.0
         self.addChild(multiplierLabel)
         
+        // Setup pause button
+        pauseButton = SKSpriteNode(imageNamed: "PauseButton")
+        pauseButton.position = CGPointMake(view.frame.size.width - 30, 20)
+        self.addChild(pauseButton)
+        
+        // Setup resume button
+        resumeButton = SKSpriteNode(imageNamed: "ResumeButton")
+        resumeButton.position = CGPointMake(view.frame.size.width * 0.5, self.frame.size.height * 0.5)
+        self.addChild(resumeButton)
+        
         // Setup Sounds
         bounceSound = SKAction.playSoundFileNamed("Bounce.caf", waitForCompletion: false)
         deepExplosionSound = SKAction.playSoundFileNamed("DeepExplosion.caf", waitForCompletion: false)
@@ -194,9 +212,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isMultiShootMode = false
         scoreLabel.hidden = true
         multiplierLabel.hidden = true
+        pauseButton.hidden = true
+        resumeButton.hidden = true
         
+        menu.score = 0
         // Load UserDefaults
         menu.topScore = userDefaults.integerForKey(kTopScoreKey)
+        
+        // Load Music
+        let url = NSBundle.mainBundle().URLForResource("ObservingTheStar", withExtension: "caf")
+        
+        var error: NSError?
+        audioPlayer = AVAudioPlayer(contentsOfURL: url, error: &error)
+        if audioPlayer == nil {
+            println("Failed to load audioplayer. Error: \(error?.localizedDescription)")
+        }
+        else {
+            audioPlayer.numberOfLoops = -1
+            audioPlayer.volume = 0.8
+            audioPlayer.play()
+            menu.isMusicOn = true
+        }
     }
     
     func newGame() {
@@ -223,10 +259,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         multiplier = 1
         scoreLabel.hidden = false
         multiplierLabel.hidden = false
-        menu.hidden = true
+        pauseButton.hidden = false
         isHaloBombPresent = false
         isMultiShootMode = false
         isGameOver = false
+        menu.hide()
     }
     
     func gameOver() {
@@ -256,19 +293,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             userDefaults.setInteger(score, forKey: kTopScoreKey)
             userDefaults.synchronize()
         }
-        menu.hidden = false
         scoreLabel.hidden = true
         multiplierLabel.hidden = true
+        pauseButton.hidden = true
         isGameOver = true
+        
+        self.runAction(SKAction.sequence([SKAction.waitForDuration(1.0), SKAction.runBlock( { self.menu.show() } )]))
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
         /* Called when a touch begins */
-        
         for touch: AnyObject in touches {
             //let location = touch.locationInNode(self)
-            if !isGameOver {
-                didShoot = true
+            if !isGameOver && !isGamePaused {
+                if !pauseButton.containsPoint(touch.locationInNode(pauseButton.parent)) {
+                    didShoot = true
+                }
             }
         }
     }
@@ -276,10 +316,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
         for touch: AnyObject in touches {
             //let location = touch.locationInNode(self)
-            if isGameOver {
+            if isGameOver && menu.isTouchable {
                 let touchedNode = menu.nodeAtPoint(touch.locationInNode(menu))
                 if touchedNode.name == "Play" {
                     newGame()
+                } else if touchedNode.name == "Music" {
+                    menu.isMusicOn = !menu.isMusicOn
+                    if menu.isMusicOn {
+                        audioPlayer.play()
+                    }
+                    else {
+                        audioPlayer.stop()
+                    }
+                }
+            }
+            else if !isGameOver {
+                if isGamePaused {
+                    if resumeButton.containsPoint(touch.locationInNode(resumeButton.parent)) {
+                        isGamePaused = false
+                    }
+                }
+                else {
+                    if pauseButton.containsPoint(touch.locationInNode(pauseButton.parent)) {
+                        isGamePaused = true
+                    }
                 }
             }
         }

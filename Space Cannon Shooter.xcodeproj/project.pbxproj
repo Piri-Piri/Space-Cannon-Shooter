@@ -18,6 +18,8 @@
 		6356F56E19E7CE4C001851E1 /* ShieldUp.caf in Resources */ = {isa = PBXBuildFile; fileRef = 6356F56D19E7CE4C001851E1 /* ShieldUp.caf */; };
 		6356F57119E7DC26001851E1 /* GreenCannon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6356F56F19E7DC26001851E1 /* GreenCannon@2x.png */; };
 		6356F57219E7DC26001851E1 /* MultiShotPowerUp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6356F57019E7DC26001851E1 /* MultiShotPowerUp@2x.png */; };
+		6378DD2319E83D860069AD28 /* PauseButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6378DD2119E83D860069AD28 /* PauseButton@2x.png */; };
+		6378DD2419E83D860069AD28 /* ResumeButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6378DD2219E83D860069AD28 /* ResumeButton@2x.png */; };
 		63C2078219E518C200BEADDD /* Bounce.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077D19E518C200BEADDD /* Bounce.caf */; };
 		63C2078319E518C200BEADDD /* DeepExplosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077E19E518C200BEADDD /* DeepExplosion.caf */; };
 		63C2078419E518C200BEADDD /* Explosion.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63C2077F19E518C200BEADDD /* Explosion.caf */; };
@@ -27,6 +29,9 @@
 		63C2078D19E545EB00BEADDD /* PlayButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078A19E545EB00BEADDD /* PlayButton@2x.png */; };
 		63C2078E19E545EB00BEADDD /* ScoreBoard@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */; };
 		63C2078F19E545EB00BEADDD /* Title@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C2078C19E545EB00BEADDD /* Title@2x.png */; };
+		63D31DA019E89C300068E7CE /* ObservingTheStar.caf in Resources */ = {isa = PBXBuildFile; fileRef = 63D31D9F19E89C300068E7CE /* ObservingTheStar.caf */; };
+		63D31DA319E89F930068E7CE /* MusicOffButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63D31DA119E89F930068E7CE /* MusicOffButton@2x.png */; };
+		63D31DA419E89F930068E7CE /* MusicOnButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63D31DA219E89F930068E7CE /* MusicOnButton@2x.png */; };
 		63D8300A19E0AA3000D9EF69 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D8300919E0AA3000D9EF69 /* AppDelegate.swift */; };
 		63D8300C19E0AA3000D9EF69 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 63D8300B19E0AA3000D9EF69 /* GameScene.sks */; };
 		63D8300E19E0AA3000D9EF69 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D8300D19E0AA3000D9EF69 /* GameScene.swift */; };
@@ -71,6 +76,8 @@
 		6356F56D19E7CE4C001851E1 /* ShieldUp.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = ShieldUp.caf; sourceTree = "<group>"; };
 		6356F56F19E7DC26001851E1 /* GreenCannon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GreenCannon@2x.png"; sourceTree = "<group>"; };
 		6356F57019E7DC26001851E1 /* MultiShotPowerUp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MultiShotPowerUp@2x.png"; sourceTree = "<group>"; };
+		6378DD2119E83D860069AD28 /* PauseButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PauseButton@2x.png"; sourceTree = "<group>"; };
+		6378DD2219E83D860069AD28 /* ResumeButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ResumeButton@2x.png"; sourceTree = "<group>"; };
 		63C2077D19E518C200BEADDD /* Bounce.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bounce.caf; sourceTree = "<group>"; };
 		63C2077E19E518C200BEADDD /* DeepExplosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DeepExplosion.caf; sourceTree = "<group>"; };
 		63C2077F19E518C200BEADDD /* Explosion.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Explosion.caf; sourceTree = "<group>"; };
@@ -80,6 +87,9 @@
 		63C2078A19E545EB00BEADDD /* PlayButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PlayButton@2x.png"; sourceTree = "<group>"; };
 		63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ScoreBoard@2x.png"; sourceTree = "<group>"; };
 		63C2078C19E545EB00BEADDD /* Title@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Title@2x.png"; sourceTree = "<group>"; };
+		63D31D9F19E89C300068E7CE /* ObservingTheStar.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = ObservingTheStar.caf; sourceTree = "<group>"; };
+		63D31DA119E89F930068E7CE /* MusicOffButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MusicOffButton@2x.png"; sourceTree = "<group>"; };
+		63D31DA219E89F930068E7CE /* MusicOnButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MusicOnButton@2x.png"; sourceTree = "<group>"; };
 		63D8300419E0AA3000D9EF69 /* Space Cannon Shooter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Cannon Shooter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		63D8300819E0AA3000D9EF69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63D8300919E0AA3000D9EF69 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -176,11 +186,23 @@
 		63C2078919E545DC00BEADDD /* Menu */ = {
 			isa = PBXGroup;
 			children = (
-				63C2078A19E545EB00BEADDD /* PlayButton@2x.png */,
-				63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */,
 				63C2078C19E545EB00BEADDD /* Title@2x.png */,
+				63C2078B19E545EB00BEADDD /* ScoreBoard@2x.png */,
+				63C2078A19E545EB00BEADDD /* PlayButton@2x.png */,
+				6378DD2119E83D860069AD28 /* PauseButton@2x.png */,
+				6378DD2219E83D860069AD28 /* ResumeButton@2x.png */,
+				63D31DA119E89F930068E7CE /* MusicOffButton@2x.png */,
+				63D31DA219E89F930068E7CE /* MusicOnButton@2x.png */,
 			);
 			name = Menu;
+			sourceTree = "<group>";
+		};
+		63D31D9E19E89C090068E7CE /* Music */ = {
+			isa = PBXGroup;
+			children = (
+				63D31D9F19E89C300068E7CE /* ObservingTheStar.caf */,
+			);
+			name = Music;
 			sourceTree = "<group>";
 		};
 		63D82FFB19E0AA3000D9EF69 = {
@@ -221,6 +243,7 @@
 		63D8300719E0AA3000D9EF69 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				63D31D9E19E89C090068E7CE /* Music */,
 				632CDB7719E5C6950081E589 /* Effects */,
 				63C2077C19E515AD00BEADDD /* Sounds */,
 				63C2077B19E515A000BEADDD /* Images */,
@@ -335,11 +358,14 @@
 				632CDB7619E5C6860081E589 /* spark.png in Resources */,
 				6356F57219E7DC26001851E1 /* MultiShotPowerUp@2x.png in Resources */,
 				63C2078519E518C200BEADDD /* Laser.caf in Resources */,
+				6378DD2419E83D860069AD28 /* ResumeButton@2x.png in Resources */,
+				63D31DA319E89F930068E7CE /* MusicOffButton@2x.png in Resources */,
 				63D8304119E0AA5200D9EF69 /* BlueBar@2x.png in Resources */,
 				63C2078619E518C200BEADDD /* Zap.caf in Resources */,
 				63D8303D19E0AA5200D9EF69 /* Ammo4@2x.png in Resources */,
 				63D8304019E0AA5200D9EF69 /* Block@2x.png in Resources */,
 				63D8303919E0AA5200D9EF69 /* Ammo0@2x.png in Resources */,
+				63D31DA419E89F930068E7CE /* MusicOnButton@2x.png in Resources */,
 				63C2078F19E545EB00BEADDD /* Title@2x.png in Resources */,
 				63C2078419E518C200BEADDD /* Explosion.caf in Resources */,
 				63D8303A19E0AA5200D9EF69 /* Ammo1@2x.png in Resources */,
@@ -350,6 +376,7 @@
 				632CDB7F19E5EE140081E589 /* LifebarExplosion.sks in Resources */,
 				63D8304419E0AA5200D9EF69 /* Starfield@2x.png in Resources */,
 				63C2078219E518C200BEADDD /* Bounce.caf in Resources */,
+				63D31DA019E89C300068E7CE /* ObservingTheStar.caf in Resources */,
 				632CDB7D19E5E86E0081E589 /* HaloExplosion.sks in Resources */,
 				632CDB7B19E5E6CA0081E589 /* BounceExplosion.sks in Resources */,
 				63D8303C19E0AA5200D9EF69 /* Ammo3@2x.png in Resources */,
@@ -358,6 +385,7 @@
 				632CDB7519E5C6860081E589 /* BallTrail.sks in Resources */,
 				63D8304319E0AA5200D9EF69 /* Halo@2x.png in Resources */,
 				63D8303B19E0AA5200D9EF69 /* Ammo2@2x.png in Resources */,
+				6378DD2319E83D860069AD28 /* PauseButton@2x.png in Resources */,
 				6356F57119E7DC26001851E1 /* GreenCannon@2x.png in Resources */,
 				63D8304219E0AA5200D9EF69 /* Cannon@2x.png in Resources */,
 			);
