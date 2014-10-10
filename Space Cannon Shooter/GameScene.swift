@@ -27,8 +27,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
     let kHaloHighAngle: CGFloat  = 340.0 * CGFloat(M_PI) / 180.0;
-    //let KHaloSpeed: CGFloat = 100.0
-    let KHaloSpeed: CGFloat = 40.0
+    let KHaloSpeed: CGFloat = 100.0
     
     let kHaloCategory:UInt32 = 0x1 << 0
     let kBallCategory:UInt32 = 0x1 << 1
@@ -36,6 +35,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kShieldCategory:UInt32 = 0x1 << 3
     let kLifebarCategory:UInt32 = 0x1 << 4
     let kShieldUpCategory:UInt32 = 0x1 << 5
+    let kCannonUpCategory:UInt32 = 0x1 << 6
     
     let kTopScoreKey = "topScore"
     let userDefaults = NSUserDefaults.standardUserDefaults()
@@ -80,6 +80,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    var haloShootedCount = 0
+    
+    var isMultiShootMode = false
     var isHaloBombPresent = false
     var isGameOver = true
     var didShoot = false
@@ -141,7 +144,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(ammoDisplay)
         
         let incrementAmmo = SKAction.sequence([SKAction.waitForDuration(1), SKAction.runBlock({ self.ammo += 1 })])
-        self.runAction(SKAction.repeatActionForever(incrementAmmo))
+        self.runAction(SKAction.repeatActionForever(incrementAmmo), withKey: "incrementAmmo")
         
         // Setup Shield Pool
         shieldPool = NSMutableArray()
@@ -185,8 +188,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Set initial values
         ammo = 5
         score = 0
+        haloShootedCount = 0
         multiplier = 1
         isGameOver = true
+        isMultiShootMode = false
         scoreLabel.hidden = true
         multiplierLabel.hidden = true
         
@@ -214,11 +219,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.actionForKey("spawnHalo")?.speed = 1.0
         ammo = 5
         score = 0
+        haloShootedCount = 0
         multiplier = 1
         scoreLabel.hidden = false
         multiplierLabel.hidden = false
         menu.hidden = true
         isHaloBombPresent = false
+        isMultiShootMode = false
         isGameOver = false
     }
     
@@ -236,6 +243,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             node.removeFromParent()
         })
         mainLayer.enumerateChildNodesWithName("shieldUp", usingBlock: { (node, stop) -> Void in
+            node.removeFromParent()
+        })
+        mainLayer.enumerateChildNodesWithName("cannonUp", usingBlock: { (node, stop) -> Void in
             node.removeFromParent()
         })
         
@@ -307,8 +317,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         })
         
         mainLayer.enumerateChildNodesWithName("shieldUp", usingBlock: { (node, stop) -> Void in
-            if node.position.y + node.frame.size.height < 0 {
+            if node.position.x + node.frame.size.width < 0 {
                 node.removeFromParent()
+            }
+        })
+        mainLayer.enumerateChildNodesWithName("cannonUp", usingBlock: { (node, stop) -> Void in
+            if node.position.x + node.frame.size.width < 0 {
+                println("reset")
+                node.removeFromParent()
+                self.haloShootedCount = 0
             }
         })
     }
@@ -318,33 +335,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ammo--
             
             // Create a ball node
-            let ball = Ball(imageNamed: "Ball")
-            let rotationVector = radiansToVector(cannon.zRotation)
-            ball.name = "ball"
-            ball.position = CGPointMake(cannon.position.x + (cannon.size.width * 0.5 * rotationVector.dx),
-                cannon.position.y + (cannon.size.width * 0.5 * rotationVector.dy));
-            mainLayer.addChild(ball)
+            if isMultiShootMode {
+                let multiShoot = SKAction.sequence([SKAction.waitForDuration(0.1), SKAction.runBlock({ self.createShootBall() })])
+                self.runAction(SKAction.repeatAction(multiShoot, count: 5))
+            }
+            else {
+                createShootBall()
+            }
             
-            ball.physicsBody = SKPhysicsBody(circleOfRadius: 6.0)
-            ball.physicsBody?.velocity = CGVectorMake(rotationVector.dx * kShootSpeed, rotationVector.dy * kShootSpeed)
-            ball.physicsBody?.restitution = 1.0
-            ball.physicsBody?.linearDamping = 0.0
-            ball.physicsBody?.friction = 0.0
-            
-            ball.physicsBody?.categoryBitMask = kBallCategory
-            ball.physicsBody?.collisionBitMask = kEdgeCategory
-            ball.physicsBody?.contactTestBitMask = kEdgeCategory | kShieldUpCategory
-            self.runAction(laserSound)
-            
-            // Create ball trail effect
-            let ballTrailPath = NSBundle.mainBundle().pathForResource("BallTrail", ofType: "sks")
-            let ballTrail = NSKeyedUnarchiver.unarchiveObjectWithFile(ballTrailPath!) as SKEmitterNode
-            ballTrail.targetNode = mainLayer
-            mainLayer.addChild(ballTrail)
-            
-            /* handle trail inside the ball class*/
-            ball.trail = ballTrail
+            /* reset multishoot mode on last shoot */
+            if ammo == 0 && isMultiShootMode {
+                isMultiShootMode = false
+                cannon.texture = SKTexture(imageNamed: "Cannon")
+                self.actionForKey("incrementAmmo")?.speed = 1
+                ammo = 5
+            }
         }
+        
+    }
+    
+    func createShootBall() {
+        // Create a ball node
+        let ball = Ball(imageNamed: "Ball")
+        let rotationVector = radiansToVector(cannon.zRotation)
+        ball.name = "ball"
+        ball.position = CGPointMake(cannon.position.x + (cannon.size.width * 0.5 * rotationVector.dx),
+            cannon.position.y + (cannon.size.width * 0.5 * rotationVector.dy));
+        mainLayer.addChild(ball)
+        
+        ball.physicsBody = SKPhysicsBody(circleOfRadius: 6.0)
+        ball.physicsBody?.velocity = CGVectorMake(rotationVector.dx * kShootSpeed, rotationVector.dy * kShootSpeed)
+        ball.physicsBody?.restitution = 1.0
+        ball.physicsBody?.linearDamping = 0.0
+        ball.physicsBody?.friction = 0.0
+        
+        ball.physicsBody?.categoryBitMask = kBallCategory
+        ball.physicsBody?.collisionBitMask = kEdgeCategory
+        ball.physicsBody?.contactTestBitMask = kEdgeCategory | kShieldUpCategory | kCannonUpCategory
+        self.runAction(laserSound)
+        
+        // Create ball trail effect
+        let ballTrailPath = NSBundle.mainBundle().pathForResource("BallTrail", ofType: "sks")
+        let ballTrail = NSKeyedUnarchiver.unarchiveObjectWithFile(ballTrailPath!) as SKEmitterNode
+        ballTrail.targetNode = mainLayer
+        mainLayer.addChild(ballTrail)
+        
+        /* handle trail inside the ball class*/
+        ball.trail = ballTrail
     }
     
     func spawnHalo() {
@@ -415,6 +452,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    func spawnCannonPowerUp() {
+        let cannonUp = SKSpriteNode(imageNamed: "MultiShotPowerUp")
+        cannonUp.name = "cannonUp"
+        cannonUp.position = CGPointMake(0 - cannonUp.size.width, randomInRange(150, high: self.frame.size.height - 100))
+        cannonUp.physicsBody = SKPhysicsBody(rectangleOfSize: CGSizeMake(42, 9))
+        cannonUp.physicsBody?.categoryBitMask = kCannonUpCategory
+        cannonUp.physicsBody?.collisionBitMask = 0
+        
+        cannonUp.physicsBody?.velocity = CGVectorMake(+100, randomInRange(-40, high: 40))
+        cannonUp.physicsBody?.linearDamping = 0  // no speed reduce due air
+        
+        mainLayer.addChild(cannonUp)
+    }
+    
     func addExplosion(name: String, position: CGPoint) {
         let explosionPath = NSBundle.mainBundle().pathForResource(name, ofType: "sks")
         var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
@@ -463,8 +514,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kBallCategory {
-            score += multiplier
             // Collision halo and ball
+            haloShootedCount++
+            score += multiplier
+            
             /* avoid multiple explosion at one time */
             if firstBody.node != nil {
                 self.addExplosion("HaloExplosion", position: firstBody.node!.position)
@@ -496,6 +549,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
+            
+            // spawn cannon powerup every tenth halo shooted
+            if haloShootedCount > 9 {
+                haloShootedCount = 0
+                spawnCannonPowerUp()
+            }
         }
         
         if firstBody.categoryBitMask == kHaloCategory && secondBody.categoryBitMask == kShieldCategory {
@@ -552,6 +611,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             firstBody.node?.removeFromParent()
             secondBody.node?.removeFromParent()
         }
+        
+        if firstBody.categoryBitMask == kBallCategory && secondBody.categoryBitMask == kCannonUpCategory {
+            // Collision ball and Cannon PowerUp
+            
+            isMultiShootMode = true
+            cannon.texture = SKTexture(imageNamed: "GreenCannon")
+            self.actionForKey("incrementAmmo")?.speed = 0
+            ammo = 5
+            
+            firstBody.node?.removeFromParent()
+            secondBody.node?.removeFromParent()
+        }
+        
         
         
     }
