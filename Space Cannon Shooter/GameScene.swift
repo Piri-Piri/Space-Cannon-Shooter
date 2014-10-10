@@ -22,6 +22,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var explosionSound: SKAction!
     var laserSound: SKAction!
     var zapSound: SKAction!
+    var shieldUpSound: SKAction!
     
     let kShootSpeed: CGFloat = 1000.0
     let kHaloLowAngle: CGFloat  = 200.0 * CGFloat(M_PI) / 180.0;
@@ -34,6 +35,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let kEdgeCategory:UInt32 = 0x1 << 2
     let kShieldCategory:UInt32 = 0x1 << 3
     let kLifebarCategory:UInt32 = 0x1 << 4
+    let kShieldUpCategory:UInt32 = 0x1 << 5
     
     let kTopScoreKey = "topScore"
     let userDefaults = NSUserDefaults.standardUserDefaults()
@@ -125,9 +127,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         
         // Add a spawn halos action
-        let spawnHalos = SKAction.sequence([SKAction.waitForDuration(2, withRange: 1), SKAction.runBlock({self.spawnHalo()})])
+        let spawnHalos = SKAction.sequence([SKAction.waitForDuration(2, withRange: 1), SKAction.runBlock({ self.spawnHalo() })])
         self.runAction(SKAction.repeatActionForever(spawnHalos), withKey: "spawnHalo")
         
+        // Add a spawn ShieldPowerUp action
+        let shieldUp = SKAction.sequence([SKAction.waitForDuration(15, withRange: 4), SKAction.runBlock({ self.spawnShieldPowerUp() })])
+        self.runAction(SKAction.repeatActionForever(shieldUp))
         
         // Add Ammo Status
         ammoDisplay = SKSpriteNode(imageNamed: "Ammo5")
@@ -170,6 +175,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         explosionSound = SKAction.playSoundFileNamed("Explosion.caf", waitForCompletion: false)
         laserSound = SKAction.playSoundFileNamed("Laser.caf", waitForCompletion: false)
         zapSound = SKAction.playSoundFileNamed("Zap.caf", waitForCompletion: false)
+        shieldUpSound = SKAction.playSoundFileNamed("ShieldUp.caf", waitForCompletion: false)
         
         // Setup Menu
         menu = Menu()
@@ -191,7 +197,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func newGame() {
         mainLayer.removeAllChildren()
         
-        println(shieldPool)
         // Add Shield
         while shieldPool.count > 0 {
             mainLayer.addChild(shieldPool.objectAtIndex(0) as SKSpriteNode)
@@ -228,6 +233,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mainLayer.enumerateChildNodesWithName("shield", usingBlock: { (node, stop) -> Void in
             /* put shield back to pool before removing the node */
             self.shieldPool.addObject(node)
+            node.removeFromParent()
+        })
+        mainLayer.enumerateChildNodesWithName("shieldUp", usingBlock: { (node, stop) -> Void in
             node.removeFromParent()
         })
         
@@ -290,11 +298,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         })
         
         mainLayer.enumerateChildNodesWithName("halo", usingBlock: { (node, stop) -> Void in
-            
             if node.position.y + node.frame.size.height < 0 {
                 if node.userData?.valueForKey(self.kHaloBombKey)?.boolValue == true {
                     self.isHaloBombPresent = false
                 }
+                node.removeFromParent()
+            }
+        })
+        
+        mainLayer.enumerateChildNodesWithName("shieldUp", usingBlock: { (node, stop) -> Void in
+            if node.position.y + node.frame.size.height < 0 {
                 node.removeFromParent()
             }
         })
@@ -320,7 +333,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             ball.physicsBody?.categoryBitMask = kBallCategory
             ball.physicsBody?.collisionBitMask = kEdgeCategory
-            ball.physicsBody?.contactTestBitMask = kEdgeCategory
+            ball.physicsBody?.contactTestBitMask = kEdgeCategory | kShieldUpCategory
             self.runAction(laserSound)
             
             // Create ball trail effect
@@ -381,6 +394,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         mainLayer.addChild(halo)
+    }
+    
+    func spawnShieldPowerUp() {
+        if shieldPool.count > 0 {
+
+        let shieldUp = SKSpriteNode(imageNamed: "Block")
+        shieldUp.name = "shieldUp"
+        shieldUp.position = CGPointMake(self.frame.size.width + shieldUp.size.width, randomInRange(150, high: self.frame.size.height - 100))
+        shieldUp.physicsBody = SKPhysicsBody(rectangleOfSize: CGSizeMake(42, 9))
+        shieldUp.physicsBody?.categoryBitMask = kShieldUpCategory
+        shieldUp.physicsBody?.collisionBitMask = 0
+        
+        shieldUp.physicsBody?.velocity = CGVectorMake(-100, randomInRange(-40, high: 40))
+        shieldUp.physicsBody?.angularVelocity = CGFloat(M_PI)
+        shieldUp.physicsBody?.linearDamping = 0  // no speed reduce due air
+        shieldUp.physicsBody?.angularDamping = 0 // no speed reduce due air
+        
+        mainLayer.addChild(shieldUp)
+        }
     }
     
     func addExplosion(name: String, position: CGPoint) {
@@ -483,13 +515,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     self.shieldPool.addObject(node)
                     node.removeFromParent()
                 })
-                println(self.shieldPool)
                 isHaloBombPresent = false
             }
             /* put shield back to pool before removing the node */
             else if secondBody.node != nil {
                 shieldPool.addObject(secondBody.node!)
-                println(self.shieldPool)
             }
             
             /* avoid multiple shield destroy at one time */
@@ -509,6 +539,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             secondBody.node?.removeFromParent()
             gameOver()
         }
+        
+        if firstBody.categoryBitMask == kBallCategory && secondBody.categoryBitMask == kShieldUpCategory {
+            // Collision ball and ShieldPowerUp
+            if shieldPool.count > 0 {
+                let randomIndex = Int(arc4random_uniform(UInt32(shieldPool.count)))
+                mainLayer.addChild(shieldPool.objectAtIndex(randomIndex) as SKSpriteNode)
+                shieldPool.removeObjectAtIndex(randomIndex)
+                self.runAction(shieldUpSound)
+            }
+            
+            firstBody.node?.removeFromParent()
+            secondBody.node?.removeFromParent()
+        }
+        
+        
     }
     
     // MARK: Helper Functions
