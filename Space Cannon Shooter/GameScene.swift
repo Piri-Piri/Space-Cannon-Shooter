@@ -382,8 +382,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         })
         mainLayer.enumerateChildNodesWithName("cannonUp", usingBlock: { (node, stop) -> Void in
-            if node.position.x + node.frame.size.width < 0 {
-                println("reset")
+            if node.position.x - node.frame.size.width > self.frame.size.width {
                 node.removeFromParent()
                 self.haloShootedCount = 0
             }
