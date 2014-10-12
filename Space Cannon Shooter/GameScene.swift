@@ -520,7 +520,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         cannonUp.physicsBody?.collisionBitMask = 0
         
         cannonUp.physicsBody?.velocity = CGVectorMake(+100, randomInRange(-40, high: 40))
+        cannonUp.physicsBody?.angularVelocity = CGFloat(M_PI)
         cannonUp.physicsBody?.linearDamping = 0  // no speed reduce due air
+        cannonUp.physicsBody?.angularDamping = 0 // no speed reduce due air
         
         mainLayer.addChild(cannonUp)
     }
