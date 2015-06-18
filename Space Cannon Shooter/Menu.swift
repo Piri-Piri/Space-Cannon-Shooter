@@ -45,24 +45,19 @@ class Menu: SKNode {
     }
     
     override init() {
-        super.init()
         title = SKSpriteNode(imageNamed: "Title")
         title.position = CGPointMake(0, 140)
-        self.addChild(title)
         
         scoreBoard = SKSpriteNode(imageNamed: "ScoreBoard")
         scoreBoard.position = CGPointMake(0, 70)
-        self.addChild(scoreBoard)
         
         playButton = SKSpriteNode(imageNamed: "PlayButton")
         playButton.name = "Play"
         playButton.position = CGPointMake(0, 0)
-        self.addChild(playButton)
         
         musicButton = SKSpriteNode(imageNamed: "MusicOnButton")
         musicButton.name = "Music"
         musicButton.position = CGPointMake(90, 0)
-        self.addChild(musicButton)
         
         scoreLabel = SKLabelNode(fontNamed: "DIN Alternate")
         scoreLabel.fontSize = 30
@@ -75,6 +70,13 @@ class Menu: SKNode {
         scoreBoard.addChild(topScoreLabel)
         
         isTouchable = true
+        
+        super.init()
+        
+        self.addChild(title)
+        self.addChild(scoreBoard)
+        self.addChild(playButton)
+        self.addChild(musicButton)
     }
 
     required init?(coder aDecoder: NSCoder) {

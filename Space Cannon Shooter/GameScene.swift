@@ -75,7 +75,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var isGamePaused: Bool = false {
         willSet{
-            println(newValue)
+            print(newValue)
         }
         didSet{
             if !isGameOver {
@@ -221,17 +221,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Load Music
         let url = NSBundle.mainBundle().URLForResource("ObservingTheStar", withExtension: "caf")
-        
-        var error: NSError?
-        audioPlayer = AVAudioPlayer(contentsOfURL: url, error: &error)
-        if audioPlayer == nil {
-            println("Failed to load audioplayer. Error: \(error?.localizedDescription)")
-        }
-        else {
+        do {
+            try audioPlayer = AVAudioPlayer(contentsOfURL: url!)
             audioPlayer.numberOfLoops = -1
             audioPlayer.volume = 0.8
             audioPlayer.play()
             menu.isMusicOn = true
+        } catch {
+            let error = error as NSError
+            print("Failed to load audioplayer. Error: \((error as NSError).localizedDescription)")
         }
     }
     
@@ -240,7 +238,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Add Shield
         while shieldPool.count > 0 {
-            mainLayer.addChild(shieldPool.objectAtIndex(0) as SKSpriteNode)
+            mainLayer.addChild(shieldPool.objectAtIndex(0) as! SKSpriteNode)
             shieldPool.removeObjectAtIndex(0)
         }
         
@@ -301,20 +299,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.runAction(SKAction.sequence([SKAction.waitForDuration(1.0), SKAction.runBlock( { self.menu.show() } )]))
     }
     
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent: UIEvent?) {
         /* Called when a touch begins */
         for touch: AnyObject in touches {
             //let location = touch.locationInNode(self)
             if !isGameOver && !isGamePaused {
-                if !pauseButton.containsPoint(touch.locationInNode(pauseButton.parent)) {
+                if !pauseButton.containsPoint(touch.locationInNode(pauseButton.parent!)) {
                     didShoot = true
                 }
             }
         }
     }
     
-    override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
-        for touch: AnyObject in touches {
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    for touch: AnyObject in touches {
             //let location = touch.locationInNode(self)
             if isGameOver && menu.isTouchable {
                 let touchedNode = menu.nodeAtPoint(touch.locationInNode(menu))
@@ -332,12 +330,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             else if !isGameOver {
                 if isGamePaused {
-                    if resumeButton.containsPoint(touch.locationInNode(resumeButton.parent)) {
+                    if resumeButton.containsPoint(touch.locationInNode(resumeButton.parent!)) {
                         isGamePaused = false
                     }
                 }
                 else {
-                    if pauseButton.containsPoint(touch.locationInNode(pauseButton.parent)) {
+                    if pauseButton.containsPoint(touch.locationInNode(pauseButton.parent!)) {
                         isGamePaused = true
                     }
                 }
@@ -359,7 +357,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         mainLayer.enumerateChildNodesWithName("ball", usingBlock: { (node, stop) -> Void in
             if node.respondsToSelector(Selector("updateTrail")) {
-                (node as Ball).updateTrail()
+                (node as! Ball).updateTrail()
             }
             if !CGRectContainsPoint(self.frame, node.position) {
                 node.removeFromParent()
@@ -435,7 +433,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Create ball trail effect
         let ballTrailPath = NSBundle.mainBundle().pathForResource("BallTrail", ofType: "sks")
-        let ballTrail = NSKeyedUnarchiver.unarchiveObjectWithFile(ballTrailPath!) as SKEmitterNode
+        let ballTrail = NSKeyedUnarchiver.unarchiveObjectWithFile(ballTrailPath!) as! SKEmitterNode
         ballTrail.targetNode = mainLayer
         mainLayer.addChild(ballTrail)
         
@@ -456,7 +454,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         halo.position = CGPointMake(randomInRange(halo.size.width * 0.5, high: self.frame.width - (halo.size.width * 0.5)), self.frame.height + (halo.size.height * 0.5))
         halo.physicsBody = SKPhysicsBody(circleOfRadius: 16.0)
         
-        var direction = radiansToVector(randomInRange(kHaloLowAngle, high: kHaloHighAngle))
+        let direction = radiansToVector(randomInRange(kHaloLowAngle, high: kHaloHighAngle))
         halo.physicsBody?.velocity = CGVectorMake(direction.dx * KHaloSpeed, direction.dy * KHaloSpeed)
         halo.physicsBody?.restitution = 1.0
         halo.physicsBody?.linearDamping = 0.0
@@ -529,7 +527,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func addExplosion(name: String, position: CGPoint) {
         let explosionPath = NSBundle.mainBundle().pathForResource(name, ofType: "sks")
-        var explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as SKEmitterNode
+        let explosion = NSKeyedUnarchiver.unarchiveObjectWithFile(explosionPath!) as! SKEmitterNode
         
         explosion.position = position
         mainLayer.addChild(explosion)
@@ -565,8 +563,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 self.runAction(bounceSound)
                 
                 if firstBody.node!.isKindOfClass(Ball) {
-                    (firstBody.node! as Ball).bounces++
-                    if (firstBody.node! as Ball).bounces > 3 {
+                    (firstBody.node! as! Ball).bounces++
+                    if (firstBody.node! as! Ball).bounces > 3 {
                         firstBody.node!.removeFromParent()
                         multiplier = 1
                     }
@@ -664,7 +662,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Collision ball and ShieldPowerUp
             if shieldPool.count > 0 {
                 let randomIndex = Int(arc4random_uniform(UInt32(shieldPool.count)))
-                mainLayer.addChild(shieldPool.objectAtIndex(randomIndex) as SKSpriteNode)
+                mainLayer.addChild(shieldPool.objectAtIndex(randomIndex) as! SKSpriteNode)
                 shieldPool.removeObjectAtIndex(randomIndex)
                 self.runAction(shieldUpSound)
             }
